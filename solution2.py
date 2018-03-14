@@ -3,7 +3,6 @@ import pygame
 import requests
 import sys
 import os
-import math
 
 
 def update_static(ll, z, map_type="map", add_params=None):
@@ -37,21 +36,17 @@ def show_map(ll, z, map_type='map', add_params=None):
     pygame.init()
     screen = pygame.display.set_mode((600, 450))
     _z = z
-    _lon, _lat = map(float, ll.split(','))
 
-
-
-    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
+    clock = pygame.time.Clock()
+    map_file = update_static(ll, _z, map_type)
     while True:
         screen.fill((0, 0, 0))
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 os.remove(map_file)
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-
                 if event.key == pygame.K_PAGEUP:
                     if _z - 1 >= 2:
                         _z -= 1
@@ -60,33 +55,17 @@ def show_map(ll, z, map_type='map', add_params=None):
                     if _z + 1 <= 17:
                         _z += 1
                         map_file = update_static(ll, _z, map_type)
-                elif event.key == pygame.K_RIGHT:
-                    _lon += 422.4 / (2 ** (_z - 1))
-                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
-
-                elif event.key == pygame.K_LEFT:
-                    _lon -= 422.4 / (2 ** (_z - 1))
-                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
-
-                elif event.key == pygame.K_UP:
-                    _lat += 178.25792 / (2 ** (_z - 1))
-                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
-
-
-                elif event.key == pygame.K_DOWN:
-                    _lat -= 178.25792 / (2 ** (_z - 1))
-                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
+        clock.tick(60)
         screen.blit(pygame.image.load(map_file), (0, 0))
         pygame.display.flip()
 
 
 def main():
-    ll = "37.620070,55.756640"
-    z = 16
+    ll = "37.588392,55.734036"
+    z = 13
     # ll_z = "ll={coordinates}&z={z}".format(**locals())
     show_map(ll, z, "map")
 
 
 if __name__ == "__main__":
     main()
-
