@@ -25,7 +25,6 @@ def show_map(ll_spn=None, map_type="map", add_params=None):
     map_file = "map.png"
     try:
         with open(map_file, "wb") as file:
-            print('Ok file')
             file.write(response.content)
             return map_file
     except IOError as ex:
@@ -39,10 +38,16 @@ def _show_map(ll_spn=None, map_type="map", add_params=None):
 
     ll = ll_spn
 
+    z = 'z=17'
+    scale_x, scale_y = 0.0019, 0.001
+
+    flag_new_foto = True
+
     clock = pygame.time.Clock()
     while True:
         screen.fill((0, 0, 0))
-        map_file = show_map('ll=' + ll, map_type, add_params)
+        if flag_new_foto:
+            map_file = show_map('ll=' + ll, map_type, z)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 os.remove(map_file)
@@ -50,13 +55,23 @@ def _show_map(ll_spn=None, map_type="map", add_params=None):
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT:
-                    print('r')
+                    dol, shir = list(map(float, ll.split(',')))
+                    dol = float(dol) + scale_x
+                    ll = '{},{}'.format(dol, shir)
                 elif event.key == pygame.K_LEFT:
-                    print('l')
+                    dol, shir = list(map(float, ll.split(',')))
+                    dol = float(dol) - scale_x
+                    ll = '{},{}'.format(dol, shir)
                 elif event.key == pygame.K_UP:
-                    print('u')
+                    dol, shir = list(map(float, ll.split(',')))
+                    shir = float(shir) + scale_y
+                    ll = '{},{}'.format(dol, shir)
                 elif event.key == pygame.K_DOWN:
-                    print('d')
+                    dol, shir = list(map(float, ll.split(',')))
+                    shir = float(shir) - scale_y
+                    ll = '{},{}'.format(dol, shir)
+
+
 
         clock.tick(60)
         screen.blit(pygame.image.load(map_file), (0, 0))
@@ -64,4 +79,4 @@ def _show_map(ll_spn=None, map_type="map", add_params=None):
 
 
 if __name__ == "__main__":
-    _show_map(ll_spn='46.011582,51.550745', )
+    _show_map(ll_spn='46.011582,51.550745')
