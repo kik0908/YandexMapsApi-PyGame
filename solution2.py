@@ -38,9 +38,9 @@ def show_map(ll, z, map_type='map', add_params=None):
     _z = z
 
     clock = pygame.time.Clock()
+    map_file = update_static(ll, _z, map_type)
     while True:
         screen.fill((0, 0, 0))
-        map_file = update_static(ll, _z, map_type)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 os.remove(map_file)
@@ -50,9 +50,11 @@ def show_map(ll, z, map_type='map', add_params=None):
                 if event.key == pygame.K_PAGEUP:
                     if _z - 1 >= 2:
                         _z -= 1
+                        map_file = update_static(ll, _z, map_type)
                 elif event.key == pygame.K_PAGEDOWN:
                     if _z + 1 <= 17:
                         _z += 1
+                        map_file = update_static(ll, _z, map_type)
         clock.tick(60)
         screen.blit(pygame.image.load(map_file), (0, 0))
         pygame.display.flip()
