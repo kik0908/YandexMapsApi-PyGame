@@ -39,9 +39,7 @@ def show_map(ll, z, map_type='map', add_params=None):
     _z = z
     _lon, _lat = map(float, ll.split(','))
 
-
-
-    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
+    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, add_params)
     while True:
         screen.fill((0, 0, 0))
 
@@ -51,31 +49,27 @@ def show_map(ll, z, map_type='map', add_params=None):
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-
                 if event.key == pygame.K_PAGEUP:
                     if _z - 1 >= 2:
                         _z -= 1
-                        map_file = update_static(ll, _z, map_type)
+                        map_file = update_static(ll, _z, map_type, add_params)
                 elif event.key == pygame.K_PAGEDOWN:
                     if _z + 1 <= 17:
                         _z += 1
-                        map_file = update_static(ll, _z, map_type)
+                        map_file = update_static(ll, _z, map_type, add_params)
                 elif event.key == pygame.K_RIGHT:
                     _lon += 422.4 / (2 ** (_z - 1))
-                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
-
+                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, add_params)
                 elif event.key == pygame.K_LEFT:
                     _lon -= 422.4 / (2 ** (_z - 1))
-                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
-
+                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, add_params)
                 elif event.key == pygame.K_UP:
                     _lat += 178.25792 / (2 ** (_z - 1))
-                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
-
-
+                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, add_params)
                 elif event.key == pygame.K_DOWN:
                     _lat -= 178.25792 / (2 ** (_z - 1))
-                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
+                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, add_params)
+
         screen.blit(pygame.image.load(map_file), (0, 0))
         pygame.display.flip()
 
@@ -83,10 +77,10 @@ def show_map(ll, z, map_type='map', add_params=None):
 def main():
     ll = "37.620070,55.756640"
     z = 16
+    point_param = "pt={}".format(ll)
     # ll_z = "ll={coordinates}&z={z}".format(**locals())
-    show_map(ll, z, "map")
+    show_map(ll, z, "map", point_param) # sat,skl
 
 
 if __name__ == "__main__":
     main()
-
