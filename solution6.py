@@ -69,6 +69,7 @@ def show_map(ll, z, map_type='map', add_params=None):
                 elif event.key == pygame.K_DOWN:
                     _lat -= 178.25792 / (2 ** (_z - 1))
                     map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, add_params)
+                    
 
         screen.blit(pygame.image.load(map_file), (0, 0))
         pygame.display.flip()
