@@ -297,6 +297,7 @@ class TextBox(Label):
                 if len(self.text) > 0:
                     self.text = self.text[:self.caret - 1] + self.text[self.caret:]
                     self.caret -= 1
+
             else:
                 if self.font.render(self.text + event.unicode, 1, self.font_color).get_rect().w < self.rect.w:
                     self.text = self.text[:self.caret] + event.unicode + self.text[self.caret:]
@@ -318,9 +319,11 @@ class TextBox(Label):
             self.flag_first_active = False
             self.text = ''
             self.caret = 0
+
         elif not self.active and not self.flag_first_active and self.text == '':
             self.flag_first_active = True
             self.text = self.default_text
+            self.caret = 0
 
         if pygame.time.get_ticks() - self.blink_timer > 200:
             self.blink = not self.blink
@@ -363,6 +366,7 @@ class TextBlock(Element):
         self.active_text = True
 
     def render(self, surface):
+        self.change_text()
         if self.bg_color != -1:
             surface.fill(self.bg_color, self.rect)
         if self.active_text:
@@ -374,3 +378,19 @@ class TextBlock(Element):
                     self.rendered_rect = self.rendered_text.get_rect()
                     self.rendered_rect.x, self.rendered_rect.y= self.rect.x+3, height*(num+1)+self.rect.y-12
                     surface.blit(self.rendered_text, self.rendered_rect)
+
+    def change_text(self):
+        for num, string in enumerate(self.text):
+            c = 1
+            flag = False
+            _ = self.font.render(string, 1, self.text_color).get_rect().w
+            while _ > self.rect.w:
+                c +=1
+                flag = True
+                _string = string.split(', ')[:c]
+                string_ = string.split(', ')[c:]
+                _ = self.font.render(', '.join(_string), 1, self.text_color).get_rect().w
+
+            if flag:
+                self.text = self.text[:num] + _string + string_ +  self.text[num+c:]
+
