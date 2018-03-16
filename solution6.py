@@ -1,12 +1,27 @@
 # coding:utf-8
-import pygame
-import requests
 import sys
 import os
 import math
 
+import pygame
+from pygame import Color
+import requests
 
-def update_static(ll, z, map_type="map", add_params=None):
+from gui import GUI, ButtonFlag, DivButtons
+
+pygame.init()
+
+satellite = {'normal': 'image/buttons/satellite.png', 'hovered': 'image/buttons/satellite_hovered.png',
+             'clicked': 'image/buttons/satellite_active.png'}
+scheme = {'normal': 'image/buttons/scheme.png', 'hovered': 'image/buttons/scheme_hovered.png',
+          'clicked': 'image/buttons/scheme_active.png'}
+gibrid = {'normal': 'image/buttons/gibrid.png', 'hovered': 'image/buttons/gibrid_hovered.png',
+          'clicked': 'image/buttons/gibrid_active.png'}
+buts = {'normal': 'image/buttons/but.png', 'hovered': 'image/buttons/but_hovered.png',
+        'clicked': 'image/buttons/but_active.png'}
+
+
+def update_static(ll, z, map_type, add_params=None):
     if ll:
         map_request = "http://static-maps.yandex.ru/1.x/?ll={ll}&z={z}&l={map_type}".format(**locals())
     else:
@@ -33,13 +48,36 @@ def update_static(ll, z, map_type="map", add_params=None):
         sys.exit(2)
 
 
-def show_map(ll, z, map_type='map', add_params=None):
+def chance_viev(_viev):
+    global map_type, flag_update_map
+    map_type = _viev
+    flag_update_map = True
+
+
+def show_map(ll, z, _map_type='map', add_params=None):
+    global map_type, flag_update_map
+    flag_update_map = False
+    map_type = _map_type
+
     pygame.init()
-    screen = pygame.display.set_mode((600, 450))
+    screen = pygame.display.set_mode((600, 540))
     _z = z
     _lon, _lat = map(float, ll.split(','))
 
+    buttons_viev = DivButtons(ButtonFlag((545, 465), buts, func=lambda: chance_viev('map'), text='Схема',
+                                         text_size=25, name='satellite', shift_text=(-4, 0)),
+                              ButtonFlag((545, 495), buts, func=lambda: chance_viev('sat'), text='Спутник',
+                                         text_size=25, name='scheme', shift_text=(4, 0)),
+                              ButtonFlag((545, 525), buts, func=lambda: chance_viev('sat,skl'), text='Гибрид',
+                                         text_size=25, name='gibrid', shift_text=(3, 0)))
+
+    GUI.add_element(buttons_viev)
+
     map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, add_params)
+    buttons_viev.elements[0].states['clicked'] = True
+    timer = 10
+    clock = pygame.time.Clock()
+
     while True:
         screen.fill((0, 0, 0))
 
@@ -49,37 +87,59 @@ def show_map(ll, z, map_type='map', add_params=None):
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
+
                 if event.key == pygame.K_PAGEUP:
                     if _z - 1 >= 2:
                         _z -= 1
-                        map_file = update_static(ll, _z, map_type, add_params)
+                        map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, add_params)
                 elif event.key == pygame.K_PAGEDOWN:
                     if _z + 1 <= 17:
                         _z += 1
-                        map_file = update_static(ll, _z, map_type, add_params)
+                        map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, add_params)
+
                 elif event.key == pygame.K_RIGHT:
-                    _lon += 422.4 / (2 ** (_z - 1))
+                    if abs(_lon) + 422.4 / (2 ** (_z - 1)) <= 180:
+                        _lon += 422.4 / (2 ** (_z - 1))
+                    else:
+                        _lon += 180
                     map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, add_params)
+
                 elif event.key == pygame.K_LEFT:
                     _lon -= 422.4 / (2 ** (_z - 1))
                     map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, add_params)
+
                 elif event.key == pygame.K_UP:
-                    _lat += 178.25792 / (2 ** (_z - 1))
+                    _lat += 197.25792 / (2 ** (_z - 1))
                     map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, add_params)
+
                 elif event.key == pygame.K_DOWN:
-                    _lat -= 178.25792 / (2 ** (_z - 1))
+                    _lat -= 197.25792 / (2 ** (_z - 1))
                     map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, add_params)
+
+            GUI.apply_event(event)
+
+        GUI.update()
+        GUI.render(screen)
+
+        if flag_update_map:
+            map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, add_params)
+            flag_update_map = False
+
+        clock.tick(60)
+        timer -= 1
+        if timer == 0:
+            timer = 30
 
         screen.blit(pygame.image.load(map_file), (0, 0))
         pygame.display.flip()
 
 
 def main():
-    ll = "37.620070,55.756640"
+    ll = "45.983259,51.536890"
     z = 16
-    point_param = "pt={}".format(ll)
+    point_param = "pt={},pm2rdm".format(ll)
     # ll_z = "ll={coordinates}&z={z}".format(**locals())
-    show_map(ll, z, "map", point_param) # sat,skl
+    show_map(ll, z, "map", point_param)
 
 
 if __name__ == "__main__":

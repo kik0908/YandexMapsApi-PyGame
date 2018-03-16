@@ -93,6 +93,10 @@ def show_map(ll, z, _map_type='map', add_params=None):
     buttons_viev.elements[0].states['clicked'] = True
     GUI.add_element(buttons_viev)
 
+    search_div = Div(TextBox((40, 5, 400, 26), '', default_text='Введите адрес...', name='tb_address'),
+                     ButtonImage((495, 19), buts, 'Поиск', func=lambda: get_coord('', 'tb_address'),name='but_search'))
+    GUI.add_element(search_div)
+
     map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
 
     timer = 10
