@@ -45,8 +45,9 @@ class GUI:
                 if obj.name == name:
                     return obj
 
+
 class Element:
-    def __init__(self, pos = (0,0), size = (1, 1)):
+    def __init__(self, pos=(0, 0), size=(1, 1)):
         self.rect = Rect(pos, size)
         self.name = ''
 
@@ -56,7 +57,8 @@ class Element:
 
 
 class Button(Element):
-    def __init__(self, text, pos, size, func, name, text_color = Color('black'), but_color = (230, 230, 230), shift_text = (0,0),size_image=None, **kwargs):
+    def __init__(self, text, pos, size, func, name, text_color=(77, 81, 83), but_color=(230, 230, 230),
+                 shift_text=(0, 0), size_image=None, **kwargs):
         super().__init__()
 
         self.text = text
@@ -77,9 +79,9 @@ class Button(Element):
             self.settings[name] = value
 
         self.font = pygame.font.Font(None, self.settings['size_font'])
-        _x = pos[0]+pygame.font.Font(None, self.settings['size_font']).size(text)[0]//2
-        self.font_rect = Rect((pos[0]+shift_text[0], pos[1]+shift_text[1]), size)
-        self.font_rect.center = (pos[0]+shift_text[0], pos[1]+shift_text[1])
+        _x = pos[0] + pygame.font.Font(None, self.settings['size_font']).size(text)[0] // 2
+        self.font_rect = Rect((pos[0] + shift_text[0], pos[1] + shift_text[1]), size)
+        self.font_rect.center = (pos[0] + shift_text[0], pos[1] + shift_text[1])
 
         self.active = True
 
@@ -108,7 +110,8 @@ class Button(Element):
 
 
 class ButtonImage(Element):
-    def __init__(self, pos, image_states, text='', size_image=None, font_path=None, text_color='black', text_size=20, name='test', func=lambda: None, shift_text = (0,0)):
+    def __init__(self, pos, image_states, text='', size_image=None, font_path=None, text_color=(77, 81, 83),
+                 text_size=20, name='test', func=lambda: None, shift_text=(0, 0)):
         super().__init__()
 
         self.normal_image = load_image(image_states['normal'])
@@ -117,10 +120,10 @@ class ButtonImage(Element):
 
         self.text = text
         self.font = pygame.font.Font(font_path, text_size)
-        self.text_color = pygame.Color(text_color)
+        self.text_color = text_color
 
         if size_image:
-            #self.size_image = size_image
+            # self.size_image = size_image
             self.rect.w, self.rect.h = size_image
 
         self.pos = pos
@@ -158,7 +161,7 @@ class ButtonImage(Element):
     def render(self, surface):
         surface.blit(self.image, self.image.get_rect(center=self.pos))
         text = self.font.render(self.text, 4, self.text_color)
-        surface.blit(text, text.get_rect(center=(self.pos[0]+self.shift_text[0], self.pos[1]+self.shift_text[1])))
+        surface.blit(text, text.get_rect(center=(self.pos[0] + self.shift_text[0], self.pos[1] + self.shift_text[1])))
 
     def apply_event(self, event):
         self.states['hovered'] = self.image.get_rect(center=self.pos).collidepoint(*pygame.mouse.get_pos())
@@ -191,6 +194,7 @@ class ButtonFlag(ButtonImage):
 
         else:
             self.image = self.normal_image
+
     def apply_event(self, event):
         self.states['hovered'] = self.image.get_rect(center=self.pos).collidepoint(*pygame.mouse.get_pos())
 
@@ -203,11 +207,11 @@ class ButtonFlag(ButtonImage):
                         return self.name
 
 
-        #elif event.type == pygame.MOUSEBUTTONUP:
-        #    if event.button == 1:
-        #        if self.states['hovered']:
-        #            self.states['after_click'] = False
-        #            self.func()
+                        # elif event.type == pygame.MOUSEBUTTONUP:
+                        #    if event.button == 1:
+                        #        if self.states['hovered']:
+                        #            self.states['after_click'] = False
+                        #            self.func()
 
 
 class Label:
@@ -215,11 +219,10 @@ class Label:
         self.rect = pygame.Rect(rect)
         self.text = text
         self.bgcolor = pygame.Color("white")
-        self.font_color = pygame.Color("gray")
+        self.font_color = (77, 81, 83)
         self.font = pygame.font.Font(None, self.rect.height - 4)
         self.rendered_text = None
         self.rendered_rect = None
-
 
     def render(self, surface):
         surface.fill(self.bgcolor, self.rect)
@@ -229,7 +232,7 @@ class Label:
 
 
 class TextBox(Label):
-    def __init__(self, rect, text, max_len=None, default_text='', name = ''):
+    def __init__(self, rect, text, max_len=None, default_text='', name=''):
         super().__init__(rect, text)
         self.active = False
         self.blink = True
@@ -284,10 +287,14 @@ class TextBox(Label):
         super(TextBox, self).render(surface)
         w = self.rect.x + self.font.render(self.text[:self.caret], 1, self.font_color).get_rect().width
 
-        pygame.draw.line(surface, Color('gray'), (self.rect.x, self.rect.y), (self.rect.x, self.rect.y + self.rect.h),2)
-        pygame.draw.line(surface, Color('gray'), (self.rect.x, self.rect.y + self.rect.h), (self.rect.x+self.rect.w, self.rect.y + self.rect.h),2)
-        pygame.draw.line(surface, Color('gray'), (self.rect.x+self.rect.w, self.rect.y), (self.rect.x+self.rect.w, self.rect.y + self.rect.h),2)
-        pygame.draw.line(surface, Color('gray'), (self.rect.x, self.rect.y), (self.rect.x+self.rect.w, self.rect.y),2)
+        pygame.draw.line(surface, Color('gray'), (self.rect.x, self.rect.y), (self.rect.x, self.rect.y + self.rect.h),
+                         2)
+        pygame.draw.line(surface, Color('gray'), (self.rect.x, self.rect.y + self.rect.h),
+                         (self.rect.x + self.rect.w, self.rect.y + self.rect.h), 2)
+        pygame.draw.line(surface, Color('gray'), (self.rect.x + self.rect.w, self.rect.y),
+                         (self.rect.x + self.rect.w, self.rect.y + self.rect.h), 2)
+        pygame.draw.line(surface, Color('gray'), (self.rect.x, self.rect.y), (self.rect.x + self.rect.w, self.rect.y),
+                         2)
 
         if self.blink and self.active:
             pygame.draw.line(
