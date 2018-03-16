@@ -58,10 +58,12 @@ def get_coord(lon, lat, text_box_name=None, address = None):
         if text_box.text != text_box.default_text:
             _address = text_box.text
 
-    coords = get_coordinates(_address)
+    if _address != None:
+        coords = get_coordinates(_address)
 
-    if coords != (None, None):
-        globals()[lon], globals()[lat] = coords
+        if coords != (None, None):
+            globals()[lon], globals()[lat] = coords
+            globals()['flag_update_map'] = True
 
 def show_map(ll, z, _map_type='map', add_params=None):
     global map_type, flag_update_map
@@ -86,14 +88,13 @@ def show_map(ll, z, _map_type='map', add_params=None):
     GUI.add_element(buttons_viev)
 
     search_div = Div(TextBox((40, 5, 400, 30), '', default_text='Введите адрес...', name='tb_address'),
-                     Button('Поиск', (495, 19), (100, 30), lambda: get_coord('_lon', '_lat', 'tb_address'),
+                     Button('Поиск', (495, 21), (100, 30), lambda: get_coord('_lon', '_lat', 'tb_address'),
                             'but_search', but_color=(255,255,255), hovered=(190, 190, 190), size_font=24, shift_text=(21, 7)))
                      #ButtonImage((495, 19), buts, 'Поиск', func=lambda: get_coord('_lon', '_lat', 'tb_address'),name='but_search'))
     GUI.add_element(search_div)
 
     map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
 
-    timer = 20
     clock = pygame.time.Clock()
 
     while True:
@@ -136,10 +137,9 @@ def show_map(ll, z, _map_type='map', add_params=None):
 
         clock.tick(60)
 
-        timer -= 1
-        if timer == 0:
+        if flag_update_map:
             map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
-            timer = 20
+            flag_update_map = False
 
         screen.blit(pygame.image.load(map_file), (0, 0))
 
