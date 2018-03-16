@@ -5,6 +5,7 @@ import pygame
 def load_image(path):
     return pygame.image.load(path).convert_alpha()
 
+
 class GUI:
     elements = []
 
@@ -55,7 +56,7 @@ class Element:
 
 
 class Button(Element):
-    def __init__(self, text, pos, size, func, name, text_color = Color('black'), but_color = (230, 230, 230), size_image=None, **kwargs):
+    def __init__(self, text, pos, size, func, name, text_color = Color('black'), but_color = (230, 230, 230), shift_text = (0,0),size_image=None, **kwargs):
         super().__init__()
 
         self.text = text
@@ -66,7 +67,7 @@ class Button(Element):
 
         self.text_color, self.color_but = text_color, but_color
 
-        #self.rect.collidepoint(event.pos)
+        self.shift_text = shift_text
 
         self.rect = Rect(pos, size)
         self.rect.center = pos
@@ -77,8 +78,8 @@ class Button(Element):
 
         self.font = pygame.font.Font(None, self.settings['size_font'])
         _x = pos[0]+pygame.font.Font(None, self.settings['size_font']).size(text)[0]//2
-        self.font_rect = Rect(pos, size)
-        self.font_rect.center = pos
+        self.font_rect = Rect((pos[0]+shift_text[0], pos[1]+shift_text[1]), size)
+        self.font_rect.center = (pos[0]+shift_text[0], pos[1]+shift_text[1])
 
         self.active = True
 
@@ -104,7 +105,6 @@ class Button(Element):
             if self.rect.collidepoint(pygame.mouse.get_pos()):
                 if event.button == 1:
                     self.function()
-
 
 
 class ButtonImage(Element):
@@ -176,6 +176,21 @@ class ButtonImage(Element):
 
 
 class ButtonFlag(ButtonImage):
+    def update(self, *args):
+        if self.states['clicked']:
+            self.image = self.click_image
+            self.states['after_click'] = True
+        elif self.states['after_click']:
+            if self.states['hovered']:
+                self.image = self.click_image
+            else:
+                self.states['after_click'] = False
+
+        elif self.states['hovered']:
+            self.image = self.hover_image
+
+        else:
+            self.image = self.normal_image
     def apply_event(self, event):
         self.states['hovered'] = self.image.get_rect(center=self.pos).collidepoint(*pygame.mouse.get_pos())
 
@@ -232,16 +247,14 @@ class TextBox(Label):
 
     def apply_event(self, event):
         if event.type == pygame.KEYDOWN and self.active:
-            if event.type == pygame.KEYDOWN and self.active:
-                if event.key == pygame.K_BACKSPACE:
-                    if len(self.text) > 0:
-                        self.text = self.text[:self.caret - 1] + self.text[self.caret:]
-                        self.caret -= 1
-
-                else:
-                    if self.font.render(self.text + event.unicode, 1, self.font_color).get_rect().w < self.rect.w:
-                        self.text = self.text[:self.caret] + event.unicode + self.text[self.caret:]
-                        self.caret += 1
+            if event.key == pygame.K_BACKSPACE:
+                if len(self.text) > 0:
+                    self.text = self.text[:self.caret - 1] + self.text[self.caret:]
+                    self.caret -= 1
+            else:
+                if self.font.render(self.text + event.unicode, 1, self.font_color).get_rect().w < self.rect.w:
+                    self.text = self.text[:self.caret] + event.unicode + self.text[self.caret:]
+                    self.caret += 1
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
@@ -249,17 +262,16 @@ class TextBox(Label):
                 if self.active:
                     if len(self.text) > 0:
                         self.caret = (event.pos[0] - self.rect.x) // (self.rendered_rect.width // len(self.text))
-                        if self.caret > len(self.text):
-                            self.caret = len(self.text) - 1
+                        if self.caret >= len(self.text):
+                            self.caret = len(self.text)
                     else:
                         self.caret = 0
-
 
     def update(self):
         if self.active and self.flag_first_active:
             self.flag_first_active = False
             self.text = ''
-
+            self.caret = 0
         elif not self.active and not self.flag_first_active and self.text == '':
             self.flag_first_active = True
             self.text = self.default_text
@@ -313,5 +325,3 @@ class DivButtons(Div):
                 for but_ in self.elements:
                     if but_.name != ans:
                         but_.states['clicked'] = False
-
-
