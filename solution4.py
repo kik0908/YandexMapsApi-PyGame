@@ -10,17 +10,14 @@ import requests
 from gui import GUI, ButtonFlag, TextBox, DivButtons, Div, ButtonImage
 from geocoder import get_coordinates
 
+
 pygame.init()
 
-satellite = {'normal': 'image/buttons/satellite.png', 'hovered': 'image/buttons/satellite_hovered.png',
-             'clicked': 'image/buttons/satellite_active.png'}
-scheme = {'normal': 'image/buttons/scheme.png', 'hovered': 'image/buttons/scheme_hovered.png',
-          'clicked': 'image/buttons/scheme_active.png'}
-gibrid = {'normal': 'image/buttons/gibrid.png', 'hovered': 'image/buttons/gibrid_hovered.png',
-          'clicked': 'image/buttons/gibrid_active.png'}
-buts = {'normal': 'image/buttons/but.png', 'hovered': 'image/buttons/but_hovered.png',
-        'clicked': 'image/buttons/but_active.png'}
 
+satellite = {'normal': 'image/buttons/satellite.png', 'hovered': 'image/buttons/satellite_hovered.png', 'clicked': 'image/buttons/satellite_active.png'}
+scheme = {'normal': 'image/buttons/scheme.png', 'hovered': 'image/buttons/scheme_hovered.png', 'clicked': 'image/buttons/scheme_active.png'}
+gibrid = {'normal': 'image/buttons/gibrid.png', 'hovered': 'image/buttons/gibrid_hovered.png', 'clicked': 'image/buttons/gibrid_active.png'}
+buts = {'normal': 'image/buttons/but.png', 'hovered': 'image/buttons/but_hovered.png', 'clicked': 'image/buttons/but_active.png'}
 
 def update_static(ll, z, map_type, add_params=None):
     if ll:
@@ -48,7 +45,6 @@ def update_static(ll, z, map_type, add_params=None):
         print("Ошибка записи временного файла:", ex)
         sys.exit(2)
 
-
 def chance_viev(_viev):
     global map_type, flag_update_map
     map_type = _viev
@@ -73,12 +69,20 @@ def show_map(ll, z, _map_type='map', add_params=None):
     global _lon, _lat
 
     flag_update_map = False
-    map_type = _map_type
+    map_type =  _map_type
+
 
     pygame.init()
     screen = pygame.display.set_mode((600, 540))
     _z = z
     _lon, _lat = map(float, ll.split(','))
+
+    #GUI.add_element(Button('Карта', (50, 465), (100, 26), lambda: chance_viev('map'), 'test_but', hovered=(180, 180, 180),
+    #                       size_font=30))
+    #GUI.add_element(Button('Спутник', (50, 495), (100, 26), lambda: chance_viev('sat'), 'test_but', hovered=(180, 180, 180),
+    #                       size_font=30))
+    #GUI.add_element(Button('Гидрид', (50, 525), (100, 26), lambda: chance_viev('sat,skl'), 'test_but', hovered=(180, 180, 180),
+    #                       size_font=30))
 
     buttons_viev = DivButtons(ButtonFlag((545, 465), buts, func=lambda: chance_viev('map'), text='Схема',
                                          text_size=23,name='but_satellite', shift_text=(-4, 0)),
@@ -87,11 +91,10 @@ def show_map(ll, z, _map_type='map', add_params=None):
                               ButtonFlag((545, 525), buts, func=lambda: chance_viev('sat,skl'), text='Гибрид',
                                          text_size=23,name='but_gibrid', shift_text=(3, 0)))
     buttons_viev.elements[0].states['clicked'] = True
-
     GUI.add_element(buttons_viev)
 
     map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
-    buttons_viev.elements[0].states['clicked'] = True
+
     timer = 10
     clock = pygame.time.Clock()
 
@@ -138,6 +141,7 @@ def show_map(ll, z, _map_type='map', add_params=None):
             map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
             flag_update_map = False
 
+
         clock.tick(60)
         timer -= 1
         if timer == 0:
@@ -159,3 +163,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
