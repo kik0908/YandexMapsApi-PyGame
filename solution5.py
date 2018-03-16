@@ -97,7 +97,6 @@ def show_map(ll, z, _map_type='map', add_params=None):
                             shift_text=(21, 7)))
 
     GUI.add_element(search_div)
-    GUI.add_element(TextBlock((2, 452, 490, 86), ['Андрекравы', 'fdsgdf', 'sdfh'], 23,text_color=Color('red'), bg_color=Color('gray')))
 
     map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
 
