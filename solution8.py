@@ -72,8 +72,9 @@ def get_coord(lon, lat, text_box_name=None, address=None, text_block=None):
                 text_block.text = [_address_[0], ', '.join(_address_[1:])]
 
 
-def clear_search(obj):
-    obj.text = ''
+def clear_search(search, tb):
+    search.text = ''
+    tb.text = []
     globals()['_pt'] = None
     globals()['flag_update_map'] = True
 
@@ -102,9 +103,9 @@ def show_map(ll, z, _map_type='map', add_params=None):
                                          text_size=23, name='but_gibrid', shift_text=(3, 0)))
     buttons_view.elements[0].states['clicked'] = True
     GUI.add_element(buttons_view)
-    tb = TextBox((40, 5, 400, 30), '', default_text='Введите адрес...', name='tb_address')
-    search_div = Div(tb,
-                     Button('X', (425, 21), (29, 28), lambda: clear_search(tb),
+    search = TextBox((40, 5, 400, 30), '', default_text='Введите адрес...', name='tb_address')
+    search_div = Div(search,
+                     Button('X', (425, 21), (29, 28), lambda: clear_search(search, _tb_info),
                             'delete', but_color=(255, 255, 255), hovered=(190, 190, 190), size_font=24,
                             shift_text=(10, 7)),
                      Button('Поиск', (500, 21), (100, 30),
