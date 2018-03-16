@@ -96,3 +96,24 @@ def get_nearest_object(point, kind):
     toponym = reverse_geocode(point, kind)
     return toponym["name"] if toponym else None
 
+
+def get_address(address):
+    geocoder_request = "http://geocode-maps.yandex.ru/1.x/?geocode={}&format=json".format(address)
+    try:
+        response = requests.get(geocoder_request)
+        if response:
+            json_response = response.json()
+
+            toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
+            _address = toponym["metaDataProperty"]["GeocoderMetaData"]['text'] #['postal_code']
+            return _address
+        else:
+            print("Ошибка выполнения запроса:")
+            print(geocoder_request)
+            print("Http статус:", response.status_code, "(", response.reason, ")")
+    except:
+        print("Запрос не удалось выполнить. Проверьте наличие сети Интернет.")
+
+if __name__ == '__main__':
+    get_address('Саратов, Валовая 30/32')
+

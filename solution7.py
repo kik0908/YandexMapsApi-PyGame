@@ -68,6 +68,12 @@ def get_coord(lon, lat, text_box_name=None, address=None):
             globals()['_pt'] = 'pt={},{},pm2rdm'.format(coords[0], coords[1])
 
 
+def clear_search(obj):
+    obj.text = ''
+    globals()['_pt'] = None
+    globals()['flag_update_map'] = True
+
+
 def show_map(ll, z, _map_type='map', add_params=None):
     global map_type, flag_update_map
     global _lon, _lat, _pt
@@ -91,6 +97,9 @@ def show_map(ll, z, _map_type='map', add_params=None):
     GUI.add_element(buttons_viev)
     tb = TextBox((40, 5, 400, 30), '', default_text='Введите адрес...', name='tb_address')
     search_div = Div(tb,
+                     Button('X', (425, 21), (29, 28), lambda: clear_search(tb),
+                            'delete', but_color=(255, 255, 255), hovered=(190, 190, 190), size_font=24,
+                            shift_text=(10, 7)),
                      Button('Поиск', (500, 21), (100, 30), lambda: get_coord('_lon', '_lat', 'tb_address'),
                             'but_search', but_color=(255, 255, 255), hovered=(190, 190, 190), size_font=24,
                             shift_text=(21, 7)))
@@ -111,12 +120,12 @@ def show_map(ll, z, _map_type='map', add_params=None):
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
 
-                if event.key == pygame.K_PAGEUP:
+                if event.key == pygame.K_PAGEUP or event.key == pygame.K_w:
                     if _z - 1 >= 2:
                         _z -= 1
                         map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, _pt)
 
-                elif event.key == pygame.K_PAGEDOWN:
+                elif event.key == pygame.K_PAGEDOWN or event.key == pygame.K_s:
                     if _z + 1 <= 17:
                         _z += 1
                         map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, _pt)
