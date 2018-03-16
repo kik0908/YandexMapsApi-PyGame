@@ -44,7 +44,6 @@ def update_static(ll, z, map_type, add_params=None):
         print("Ошибка записи временного файла:", ex)
         sys.exit(2)
 
-
 def change_view(_view):
     global map_type, flag_update_map
     map_type = _view
@@ -94,6 +93,7 @@ def show_map(ll, z, _map_type='map', add_params=None):
     _tb_info = TextBlock((2, 452, 490, 86), [],
                          24, text_color=(77, 81, 83), bg_color=(255, 255, 255), name='tb_info')
     GUI.add_element(_tb_info)
+
 
     buttons_view = DivButtons(ButtonFlag((545, 465), buts, func=lambda: change_view('map'), text='Схема',
                                          text_size=23, name='but_satellite', shift_text=(-4, 0)),
