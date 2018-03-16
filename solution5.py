@@ -7,7 +7,7 @@ import pygame
 from pygame import Color
 import requests
 
-from gui import GUI, ButtonFlag, TextBox, DivButtons, Div, ButtonImage
+from gui import GUI, ButtonFlag, TextBox, DivButtons, Div, ButtonImage, Button
 from geocoder import get_coordinates
 
 
@@ -50,9 +50,7 @@ def chance_viev(_viev):
     map_type = _viev
     flag_update_map = True
 
-def get_coord(address, text_box_name=None):
-    global _lon, _lat
-
+def get_coord(lon, lat, text_box_name=None, address = None):
     _address = address
 
     if text_box_name:
@@ -62,7 +60,8 @@ def get_coord(address, text_box_name=None):
 
     coords = get_coordinates(_address)
 
-    _lon, _lat = coords
+    if coords != (None, None):
+        globals()[lon], globals()[lat] = coords
 
 def show_map(ll, z, _map_type='map', add_params=None):
     global map_type, flag_update_map
@@ -77,13 +76,6 @@ def show_map(ll, z, _map_type='map', add_params=None):
     _z = z
     _lon, _lat = map(float, ll.split(','))
 
-    #GUI.add_element(Button('Карта', (50, 465), (100, 26), lambda: chance_viev('map'), 'test_but', hovered=(180, 180, 180),
-    #                       size_font=30))
-    #GUI.add_element(Button('Спутник', (50, 495), (100, 26), lambda: chance_viev('sat'), 'test_but', hovered=(180, 180, 180),
-    #                       size_font=30))
-    #GUI.add_element(Button('Гидрид', (50, 525), (100, 26), lambda: chance_viev('sat,skl'), 'test_but', hovered=(180, 180, 180),
-    #                       size_font=30))
-
     buttons_viev = DivButtons(ButtonFlag((545, 465), buts, func=lambda: chance_viev('map'), text='Схема',
                                          text_size=23,name='but_satellite', shift_text=(-4, 0)),
                               ButtonFlag((545, 495), buts, func=lambda: chance_viev('sat'), text='Спутник',
@@ -93,13 +85,15 @@ def show_map(ll, z, _map_type='map', add_params=None):
     buttons_viev.elements[0].states['clicked'] = True
     GUI.add_element(buttons_viev)
 
-    search_div = Div(TextBox((40, 5, 400, 26), '', default_text='Введите адрес...', name='tb_address'),
-                     ButtonImage((495, 19), buts, 'Поиск', func=lambda: get_coord('', 'tb_address'),name='but_search'))
+    search_div = Div(TextBox((40, 5, 400, 30), '', default_text='Введите адрес...', name='tb_address'),
+                     Button('Поиск', (495, 19), (100, 30), lambda: get_coord('_lon', '_lat', 'tb_address'),
+                            'but_search', but_color=(255,255,255), hovered=(190, 190, 190), size_font=24, shift_text=(21, 7)))
+                     #ButtonImage((495, 19), buts, 'Поиск', func=lambda: get_coord('_lon', '_lat', 'tb_address'),name='but_search'))
     GUI.add_element(search_div)
 
     map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
 
-    timer = 10
+    timer = 20
     clock = pygame.time.Clock()
 
     while True:
@@ -140,16 +134,12 @@ def show_map(ll, z, _map_type='map', add_params=None):
 
             GUI.apply_event(event)
 
-
-        if flag_update_map:
-            map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
-            flag_update_map = False
-
-
         clock.tick(60)
+
         timer -= 1
         if timer == 0:
-            timer = 30
+            map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
+            timer = 20
 
         screen.blit(pygame.image.load(map_file), (0, 0))
 
