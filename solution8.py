@@ -45,7 +45,7 @@ def update_static(ll, z, map_type, add_params=None):
         print("Ошибка записи временного файла:", ex)
         sys.exit(2)
 
-def chance_viev(_viev):
+def change_viev(_viev):
     global map_type, flag_update_map
     map_type = _viev
     flag_update_map = True
@@ -89,12 +89,12 @@ def show_map(ll, z, _map_type='map', add_params=None):
                          24, text_color=Color('black'), bg_color=Color('gray'), name='tb_info')
     GUI.add_element(_tb_info)
 
-    buttons_viev = DivButtons(ButtonFlag((545, 465), buts, func=lambda: chance_viev('map'), text='Схема',
-                                         text_size=23,name='but_satellite', shift_text=(-4, 0)),
-                              ButtonFlag((545, 495), buts, func=lambda: chance_viev('sat'), text='Спутник',
-                                         text_size=23,name='but_scheme', shift_text=(4, 0)),
-                              ButtonFlag((545, 525), buts, func=lambda: chance_viev('sat,skl'), text='Гибрид',
-                                         text_size=23,name='but_gibrid', shift_text=(3, 0)))
+    buttons_viev = DivButtons(ButtonFlag((545, 465), buts, func=lambda: change_viev('map'), text='Схема',
+                                         text_size=23, name='but_satellite', shift_text=(-4, 0)),
+                              ButtonFlag((545, 495), buts, func=lambda: change_viev('sat'), text='Спутник',
+                                         text_size=23, name='but_scheme', shift_text=(4, 0)),
+                              ButtonFlag((545, 525), buts, func=lambda: change_viev('sat,skl'), text='Гибрид',
+                                         text_size=23, name='but_gibrid', shift_text=(3, 0)))
     buttons_viev.elements[0].states['clicked'] = True
     GUI.add_element(buttons_viev)
 
