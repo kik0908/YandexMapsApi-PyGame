@@ -39,8 +39,6 @@ def show_map(ll, z, map_type='map', add_params=None):
     _z = z
     _lon, _lat = map(float, ll.split(','))
 
-
-
     map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type)
     while True:
         screen.fill((0, 0, 0))
