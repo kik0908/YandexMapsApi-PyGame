@@ -395,12 +395,18 @@ class TextBlock(Element):
                 self.text = self.text[:num] + _string + string_ +  self.text[num+c:]
 
 class Switch():
-    def __init__(self, rect, color_switch, color_background, color_background_on, func=None): #func=None, name=None
+    def __init__(self, rect, text, color_switch, color_background, color_background_on, func): #func=None, name=None
         self.rect = Rect(rect)
+        self.text = text
+        self.bgcolor = pygame.Color("white")
+        self.font_color = (77, 81, 83)
+        self.font = pygame.font.Font(None, self.rect.height - 4)
+        self.rendered_text = None
+        self.rendered_rect = None
+
         self.rect_background = Rect(rect)
         self.rect_background.w = self.rect.w * 2
-        #self.function = func
-        # self.name = name
+        self.function = func
         self.color_switch = color_switch
         self.color_background = color_background
         self.color_background_on = color_background_on
@@ -408,8 +414,6 @@ class Switch():
         self.active = False
         self.on = False
         self.flag_first_active = False
-
-        #self.name = name
 
     def set(self, **kwargs):
         for name, value in kwargs.items():
@@ -422,8 +426,7 @@ class Switch():
                 if self.active:
                     self.flag_first_active = True
                     self.on = not self.on
-                    globals()['status_switch'] = self.on
-                    #self.function(self.on, address)
+                    self.function()
 
     def update(self):
         if (self.rect.topright[0]==self.rect_background.x+self.rect_background.w and self.on) or (self.rect.topleft[0] == self.rect_background.x and not self.on):
@@ -446,3 +449,7 @@ class Switch():
                          (self.rect_background.x + self.rect_background.w, self.rect_background.y + self.rect_background.h), 1)
         pygame.draw.line(screen, Color('gray'), (self.rect_background.x, self.rect_background.y), (self.rect_background.x + self.rect_background.w, self.rect_background.y),
                          1)
+
+        self.rendered_text = self.font.render(self.text, 1, self.font_color)
+        self.rendered_rect = self.rendered_text.get_rect(y=self.rect_background.y-25, centerx = self.rect_background.x + self.rect_background.w//2) # y=495, centerx=self.rect_background.x + self.rect_background.w//2
+        screen.blit(self.rendered_text, self.rendered_rect)
