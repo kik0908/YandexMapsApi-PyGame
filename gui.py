@@ -397,3 +397,55 @@ class TextBlock(Element):
                 if self.text[0] == '':
                     self.text = self.text[1:]
 
+class Switch():
+    def __init__(self, rect, color_switch, color_background, color_background_on, func=None): #func=None, name=None
+        self.rect = Rect(rect)
+        self.rect_background = Rect(rect)
+        self.rect_background.w = self.rect.w * 2
+        #self.function = func
+        # self.name = name
+        self.color_switch = color_switch
+        self.color_background = color_background
+        self.color_background_on = color_background_on
+        self.address = None
+        self.active = False
+        self.on = False
+        self.flag_first_active = False
+
+        #self.name = name
+
+    def set(self, **kwargs):
+        for name, value in kwargs.items():
+            self.settings[name] = value
+
+    def apply_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                self.active = self.rect.collidepoint(event.pos)
+                if self.active:
+                    self.flag_first_active = True
+                    self.on = not self.on
+                    globals()['status_switch'] = self.on
+                    #self.function(self.on, address)
+
+    def update(self):
+        if (self.rect.topright[0]==self.rect_background.x+self.rect_background.w and self.on) or (self.rect.topleft[0] == self.rect_background.x and not self.on):
+            self.flag_first_active = False
+        if self.flag_first_active and self.on:
+            self.rect.x+=1
+        elif self.flag_first_active and not self.on:
+            self.rect.x-=1
+
+
+    def render(self, screen):
+        pygame.draw.rect(screen, self.color_background, (self.rect_background.x, self.rect_background.y,self.rect_background.w,self.rect_background.h)) # фон
+        pygame.draw.rect(screen, self.color_switch, (self.rect.x, self.rect.y, self.rect.w, self.rect.h)) # сам ползунок
+
+        pygame.draw.line(screen, Color('gray'), (self.rect_background.x, self.rect_background.y), (self.rect_background.x, self.rect_background.y + self.rect_background.h),
+                         1)
+        pygame.draw.line(screen, Color('gray'), (self.rect_background.x, self.rect_background.y + self.rect_background.h),
+                         (self.rect_background.x + self.rect_background.w, self.rect_background.y + self.rect_background.h), 1)
+        pygame.draw.line(screen, Color('gray'), (self.rect_background.x + self.rect_background.w, self.rect_background.y),
+                         (self.rect_background.x + self.rect_background.w, self.rect_background.y + self.rect_background.h), 1)
+        pygame.draw.line(screen, Color('gray'), (self.rect_background.x, self.rect_background.y), (self.rect_background.x + self.rect_background.w, self.rect_background.y),
+                         1)
