@@ -125,14 +125,13 @@ def get_postal_code(address):
 
             toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
             _post_code = toponym["metaDataProperty"]["GeocoderMetaData"]["Address"]['postal_code']
-           # print(_post_code)
             return _post_code
         else:
             print("Ошибка выполнения запроса:")
             print(geocoder_request)
             print("Http статус:", response.status_code, "(", response.reason, ")")
     except:
-        print("Запрос не удалось выполнить. Проверьте наличие сети Интернет.")
+        return 'индекс не найден'
 
 if __name__ == '__main__':
     get_address('Саратов, Валовая 30/32')
