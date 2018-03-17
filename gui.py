@@ -394,4 +394,6 @@ class TextBlock(Element):
 
             if flag:
                 self.text = [', '.join(self.text[:num]),', '.join(_string), ', '.join(string_) ,', '.join(self.text[num+1:])]
+                if self.text[0] == '':
+                    self.text = self.text[1:]
 
