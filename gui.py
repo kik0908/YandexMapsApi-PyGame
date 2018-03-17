@@ -381,18 +381,21 @@ class TextBlock(Element):
 
     def change_text(self):
         for num, string in enumerate(self.text):
-            c = 1
+            c = 0
             flag = False
-            _ = self.font.render(string, 1, self.text_color).get_rect().w
-            while _ > self.rect.w:
-                c +=1
+            _ = self.font.render(string, 1, self.text_color).get_size()[0]
+            while _ >= self.rect.w:
+                c -=1
                 flag = True
                 _string = string.split(', ')[:c]
                 string_ = string.split(', ')[c:]
-                _ = self.font.render(', '.join(_string), 1, self.text_color).get_rect().w
+
+                _ = self.font.render(', '.join(_string), 1, self.text_color).get_size()[0]
 
             if flag:
-                self.text = self.text[:num] + _string + string_ +  self.text[num+c:]
+                self.text = [', '.join(self.text[:num]),', '.join(_string), ', '.join(string_) ,', '.join(self.text[num+1:])]
+                if self.text[0] == '':
+                    self.text = self.text[1:]
 
 class Switch():
     def __init__(self, rect, text, color_switch, color_background, color_background_on, func): #func=None, name=None

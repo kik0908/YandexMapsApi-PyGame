@@ -2,6 +2,7 @@
 
 import requests
 
+
 def geocode(address, lang="ru_RU"):
     # Собираем запрос для геокодера.
     geocoder_request = "http://geocode-maps.yandex.ru/1.x/?geocode={address}&format=json&lang={lang}".format(**locals())
@@ -17,7 +18,7 @@ def geocode(address, lang="ru_RU"):
             """Ошибка выполнения запроса:
             {request}
             Http статус: {status} ({reason})""".format(
-            request=geocoder_request, status=response.status_code, reason=response.reason))
+                request=geocoder_request, status=response.status_code, reason=response.reason))
 
     # Получаем первый топоним из ответа геокодера.
     # Согласно описанию ответа он находится по следующему пути:
@@ -29,8 +30,8 @@ def geocode(address, lang="ru_RU"):
 def get_coordinates(address):
     toponym = geocode(address)
     if not toponym:
-        return (None,None)
-    
+        return (None, None)
+
     # Координаты центра топонима:
     toponym_coodrinates = toponym["Point"]["pos"]
     # Широта, преобразованная в плавающее число:
@@ -42,7 +43,7 @@ def get_coordinates(address):
 def get_ll_span(address):
     toponym = geocode(address)
     if not toponym:
-        return (None,None)
+        return (None, None)
 
     # Координаты центра топонима:
     toponym_coodrinates = toponym["Point"]["pos"]
@@ -56,9 +57,9 @@ def get_ll_span(address):
     envelope = toponym["boundedBy"]["Envelope"]
 
     # левая, нижняя, правая и верхняя границы из координат углов:
-    l,b = envelope["lowerCorner"].split(" ")
-    r,t = envelope["upperCorner"].split(" ")
-  
+    l, b = envelope["lowerCorner"].split(" ")
+    r, t = envelope["upperCorner"].split(" ")
+
     # Вычисляем полуразмеры по вертикали и горизонтали
     dx = abs(float(l) - float(r)) / 2.0
     dy = abs(float(t) - float(b)) / 2.0
@@ -67,6 +68,7 @@ def get_ll_span(address):
     span = "{dx},{dy}".format(**locals())
 
     return (ll, span)
+
 
 # Находим ближайший к заданной точке объект заданного типа.
 def reverse_geocode(point, kind):
@@ -82,11 +84,10 @@ def reverse_geocode(point, kind):
             """Ошибка выполнения запроса:
             {request}
             Http статус: {status} ({reason})""".format(
-            request=geocoder_request, status=response.status_code, reason=response.reason))
+                request=geocoder_request, status=response.status_code, reason=response.reason))
 
     # Преобразуем ответ в json-объект
     json_response = response.json()
-    
     # Получаем первый топоним из ответа геокодера.
     features = json_response["response"]["GeoObjectCollection"]["featureMember"]
     return features[0]["GeoObject"] if features else None
@@ -105,7 +106,7 @@ def get_address(address):
             json_response = response.json()
 
             toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
-            _address = toponym["metaDataProperty"]["GeocoderMetaData"]['text'] #['postal_code']
+            _address = toponym["metaDataProperty"]["GeocoderMetaData"]['text']  # ['postal_code']
             return _address
         else:
             print("Ошибка выполнения запроса:")
@@ -113,6 +114,7 @@ def get_address(address):
             print("Http статус:", response.status_code, "(", response.reason, ")")
     except:
         print("Запрос не удалось выполнить. Проверьте наличие сети Интернет.")
+
 
 def get_postal_code(address):
     geocoder_request = "http://geocode-maps.yandex.ru/1.x/?geocode={}&format=json".format(address)
@@ -133,3 +135,4 @@ def get_postal_code(address):
 
 if __name__ == '__main__':
     get_address('Саратов, Валовая 30/32')
+
