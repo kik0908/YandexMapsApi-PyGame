@@ -69,7 +69,7 @@ def get_coord(lon, lat, text_box_name=None, address=None, text_block=None):
 
             if text_block:
                 _address_ = get_address(_address).split(', ')
-                text_block.text = [_address_[0], ', '.join(_address_[1:])]
+                text_block.text = [', '.join(_address_)]
 
 
 def clear_search(search, tb):
