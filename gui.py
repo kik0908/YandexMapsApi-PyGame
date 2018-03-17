@@ -381,16 +381,78 @@ class TextBlock(Element):
 
     def change_text(self):
         for num, string in enumerate(self.text):
-            c = 1
+            c = 0
             flag = False
-            _ = self.font.render(string, 1, self.text_color).get_rect().w
-            while _ > self.rect.w:
-                c +=1
+            _ = self.font.render(string, 1, self.text_color).get_size()[0]
+            while _ >= self.rect.w:
+                c -=1
                 flag = True
                 _string = string.split(', ')[:c]
                 string_ = string.split(', ')[c:]
-                _ = self.font.render(', '.join(_string), 1, self.text_color).get_rect().w
+
+                _ = self.font.render(', '.join(_string), 1, self.text_color).get_size()[0]
 
             if flag:
-                self.text = self.text[:num] + _string + string_ +  self.text[num+c:]
+                self.text = [', '.join(self.text[:num]),', '.join(_string), ', '.join(string_) ,', '.join(self.text[num+1:])]
+                if self.text[0] == '':
+                    self.text = self.text[1:]
 
+class Switch():
+    def __init__(self, rect, text, color_switch, color_background, color_background_on, func): #func=None, name=None
+        self.rect = Rect(rect)
+        self.text = text
+        self.bgcolor = pygame.Color("white")
+        self.font_color = (77, 81, 83)
+        self.font = pygame.font.Font(None, self.rect.height - 4)
+        self.rendered_text = None
+        self.rendered_rect = None
+
+        self.rect_background = Rect(rect)
+        self.rect_background.w = self.rect.w * 2
+        self.function = func
+        self.color_switch = color_switch
+        self.color_background = color_background
+        self.color_background_on = color_background_on
+        self.address = None
+        self.active = False
+        self.on = False
+        self.flag_first_active = False
+
+    def set(self, **kwargs):
+        for name, value in kwargs.items():
+            self.settings[name] = value
+
+    def apply_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                self.active = self.rect.collidepoint(event.pos)
+                if self.active:
+                    self.flag_first_active = True
+                    self.on = not self.on
+                    self.function()
+
+    def update(self):
+        if (self.rect.topright[0]==self.rect_background.x+self.rect_background.w and self.on) or (self.rect.topleft[0] == self.rect_background.x and not self.on):
+            self.flag_first_active = False
+        if self.flag_first_active and self.on:
+            self.rect.x+=1
+        elif self.flag_first_active and not self.on:
+            self.rect.x-=1
+
+
+    def render(self, screen):
+        pygame.draw.rect(screen, self.color_background, (self.rect_background.x, self.rect_background.y,self.rect_background.w,self.rect_background.h)) # фон
+        pygame.draw.rect(screen, self.color_switch, (self.rect.x, self.rect.y, self.rect.w, self.rect.h)) # сам ползунок
+
+        pygame.draw.line(screen, Color('gray'), (self.rect_background.x, self.rect_background.y), (self.rect_background.x, self.rect_background.y + self.rect_background.h),
+                         1)
+        pygame.draw.line(screen, Color('gray'), (self.rect_background.x, self.rect_background.y + self.rect_background.h),
+                         (self.rect_background.x + self.rect_background.w, self.rect_background.y + self.rect_background.h), 1)
+        pygame.draw.line(screen, Color('gray'), (self.rect_background.x + self.rect_background.w, self.rect_background.y),
+                         (self.rect_background.x + self.rect_background.w, self.rect_background.y + self.rect_background.h), 1)
+        pygame.draw.line(screen, Color('gray'), (self.rect_background.x, self.rect_background.y), (self.rect_background.x + self.rect_background.w, self.rect_background.y),
+                         1)
+
+        self.rendered_text = self.font.render(self.text, 1, self.font_color)
+        self.rendered_rect = self.rendered_text.get_rect(y=self.rect_background.y-25, centerx = self.rect_background.x + self.rect_background.w//2) # y=495, centerx=self.rect_background.x + self.rect_background.w//2
+        screen.blit(self.rendered_text, self.rendered_rect)
