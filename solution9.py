@@ -6,8 +6,8 @@ import math
 import pygame
 import requests
 
-from gui import GUI, ButtonFlag, TextBox, DivButtons, Div, ButtonImage, Button, TextBlock
-from geocoder import get_coordinates, get_address
+from gui import GUI, ButtonFlag, TextBox, DivButtons, Div, ButtonImage, Button, TextBlock, Switch
+from geocoder import get_coordinates, get_address, get_postal_code
 
 pygame.init()
 
@@ -56,6 +56,9 @@ def get_coord(lon, lat, text_box_name=None, address=None, text_block=None):
         text_box = GUI.get_object(text_box_name)
         if text_box.text != text_box.default_text:
             _address = text_box.text
+            globals()['address'] = text_box.text
+            #print(globals()['address'])
+
     if _address != None:
         coords = get_coordinates(_address)
         if coords != (None, None):
@@ -73,12 +76,19 @@ def clear_search(search, tb):
     globals()['_pt'] = None
     globals()['flag_update_map'] = True
 
+def post_code(_status_switch, _address):
+    if _status_switch and _address:
+        globals()['postcode'] = get_postal_code(_address)
+        #globals()['postcode'] = get_postal_code(_address)
+        #print(get_postal_code(_address))
+
 
 def show_map(ll, z, _map_type='map', add_params=None):
     global map_type, flag_update_map
     global _lon, _lat, _pt
 
     flag_update_map = False
+    postcode = None
     map_type = _map_type
 
     pygame.init()
@@ -109,10 +119,15 @@ def show_map(ll, z, _map_type='map', add_params=None):
                             'but_search', but_color=(255, 255, 255), hovered=(190, 190, 190), size_font=24,
                             shift_text=(21, 7)))
     GUI.add_element(search_div)
+    switch = Switch((400, 468, 40, 25), color_switch=(62, 151, 209), color_background=(240, 248, 255),
+                    color_background_on=(240, 248, 255), func = lambda: post_code(globals()['status_switch'], globals()['address'])) #func = lambda: get_post_code() globals()['address']
+    GUI.add_element(switch)
 
     map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, _pt)
     clock = pygame.time.Clock()
     while True:
+        print(globals())
+        #print(postcode)
         screen.fill((254, 202, 131))
 
         for event in pygame.event.get():

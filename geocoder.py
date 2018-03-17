@@ -114,6 +114,23 @@ def get_address(address):
     except:
         print("Запрос не удалось выполнить. Проверьте наличие сети Интернет.")
 
+def get_postal_code(address):
+    geocoder_request = "http://geocode-maps.yandex.ru/1.x/?geocode={}&format=json".format(address)
+    try:
+        response = requests.get(geocoder_request)
+        if response:
+            json_response = response.json()
+
+            toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
+            _post_code = toponym["metaDataProperty"]["GeocoderMetaData"]["Address"]['postal_code']
+           # print(_post_code)
+            return _post_code
+        else:
+            print("Ошибка выполнения запроса:")
+            print(geocoder_request)
+            print("Http статус:", response.status_code, "(", response.reason, ")")
+    except:
+        print("Запрос не удалось выполнить. Проверьте наличие сети Интернет.")
+
 if __name__ == '__main__':
     get_address('Саратов, Валовая 30/32')
-
