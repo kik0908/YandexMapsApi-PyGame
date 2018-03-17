@@ -6,8 +6,8 @@ import math
 import pygame
 import requests
 
-from gui import GUI, ButtonFlag, TextBox, DivButtons, Div, ButtonImage, Button, TextBlock
-from geocoder import get_coordinates, get_address
+from gui import GUI, ButtonFlag, TextBox, DivButtons, Div, ButtonImage, Button, TextBlock, Switch
+from geocoder import get_coordinates, get_address, get_postal_code
 
 pygame.init()
 
@@ -51,7 +51,7 @@ def change_view(_view):
     flag_update_map = True
 
 
-def get_coord(lon, lat, text_box_name=None, address=None, text_block=None):
+def get_coord(lon, lat, text_box_name=None, address=None, text_block=None, switch=None):
     _address = address
 
     if text_box_name:
@@ -60,6 +60,7 @@ def get_coord(lon, lat, text_box_name=None, address=None, text_block=None):
             _address = text_box.text
 
     if _address != None:
+        post_code(switch, _address)
         coords = get_coordinates(_address)
 
         if coords != (None, None):
@@ -70,6 +71,15 @@ def get_coord(lon, lat, text_box_name=None, address=None, text_block=None):
             if text_block:
                 _address_ = get_address(_address).split(', ')
                 text_block.text = [_address_[0], ', '.join(_address_[1:])]
+                if globals()['postcode']:
+                    text_block.text.append(globals()['postcode'])
+
+
+def post_code(_status_switch, _address):
+    if _status_switch and _address:
+        globals()['postcode'] = get_postal_code(_address)
+    if not _status_switch and _address:
+        globals()['postcode'] = ''
 
 
 def clear_search(search, tb):
@@ -81,9 +91,11 @@ def clear_search(search, tb):
 
 def show_map(ll, z, _map_type='map', add_params=None):
     global map_type, flag_update_map
-    global _lat, _lon, _pt
+    global _lat, _lon, _pt, address, postcode
 
     flag_update_map = False
+    postcode = None
+    address = None
     map_type = _map_type
 
     pygame.init()
@@ -109,11 +121,15 @@ def show_map(ll, z, _map_type='map', add_params=None):
                             'delete', but_color=(255, 255, 255), hovered=(190, 190, 190), size_font=24,
                             shift_text=(10, 7)),
                      Button('Поиск', (500, 21), (100, 30),
-                            lambda: get_coord('_lat', '_lon', 'tb_address', text_block=_tb_info),
+                            lambda: get_coord('_lat', '_lon', 'tb_address', text_block=_tb_info, switch=switch.on),
                             'but_search', but_color=(255, 255, 255), hovered=(190, 190, 190), size_font=24,
                             shift_text=(21, 7)))
 
     GUI.add_element(search_div)
+    switch = Switch((411, 512, 40, 25), 'Индекс', color_switch=(62, 151, 209), color_background=(240, 248, 255),
+                    color_background_on=(240, 248, 255), func=lambda: post_code(switch.on, globals()[
+            'address']))  # func = lambda: get_post_code() globals()['address']
+    GUI.add_element(switch)
 
     map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
 
@@ -164,10 +180,13 @@ def show_map(ll, z, _map_type='map', add_params=None):
                     x, y = pos[0] - 300, 225 - pos[1]
                     lat, lon = _lat + x * x_k, _lon + y * y_k
                     clear_search(search, _tb_info)
+                    post_code(switch.on, ','.join([str(lat), str(lon)]))
                     _pt = 'pt={},{},pm2rdm'.format(lat, lon)
                     _address_ = get_address(','.join([str(lat), str(lon)])).split(', ')
                     _tb_info.text = [_address_[0], ', '.join(_address_[1:])]
                     map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
+                    if globals()['postcode']:
+                        _tb_info.text.append(globals()['postcode'])
 
             GUI.apply_event(event)
 

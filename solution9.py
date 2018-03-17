@@ -44,14 +44,16 @@ def update_static(ll, z, map_type, add_params=None):
         print("Ошибка записи временного файла:", ex)
         sys.exit(2)
 
+
 def change_view(_view):
     global map_type, flag_update_map
     map_type = _view
     flag_update_map = True
 
 
-def get_coord(lon, lat, text_box_name=None, address=None, text_block=None):
+def get_coord(lon, lat, text_box_name=None, address=None, text_block=None, switch=None):
     _address = address
+
     if text_box_name:
         text_box = GUI.get_object(text_box_name)
         if text_box.text != text_box.default_text:
@@ -59,6 +61,7 @@ def get_coord(lon, lat, text_box_name=None, address=None, text_block=None):
             globals()['address'] = text_box.text
 
     if _address != None:
+        post_code(switch, _address)
         coords = get_coordinates(_address)
         if coords != (None, None):
             globals()[lon], globals()[lat] = coords
@@ -77,11 +80,14 @@ def clear_search(search, tb):
     globals()['_pt'] = None
     globals()['flag_update_map'] = True
 
+
 def post_code(_status_switch, _address):
+    print(_address)
     if _status_switch and _address:
         globals()['postcode'] = get_postal_code(_address)
     if not _status_switch and _address:
         globals()['postcode'] = ''
+
 
 def show_map(ll, z, _map_type='map', add_params=None):
     global map_type, flag_update_map, address, postcode
@@ -101,7 +107,6 @@ def show_map(ll, z, _map_type='map', add_params=None):
                          24, text_color=(77, 81, 83), bg_color=(255, 255, 255), name='tb_info')
     GUI.add_element(_tb_info)
 
-
     buttons_view = DivButtons(ButtonFlag((545, 465), buts, func=lambda: change_view('map'), text='Схема',
                                          text_size=23, name='but_satellite', shift_text=(-4, 0)),
                               ButtonFlag((545, 495), buts, func=lambda: change_view('sat'), text='Спутник',
@@ -116,12 +121,13 @@ def show_map(ll, z, _map_type='map', add_params=None):
                             'delete', but_color=(255, 255, 255), hovered=(190, 190, 190), size_font=24,
                             shift_text=(10, 7)),
                      Button('Поиск', (500, 21), (100, 30),
-                            lambda: get_coord('_lon', '_lat', 'tb_address', text_block=_tb_info),
+                            lambda: get_coord('_lon', '_lat', 'tb_address', text_block=_tb_info, switch=switch.on),
                             'but_search', but_color=(255, 255, 255), hovered=(190, 190, 190), size_font=24,
                             shift_text=(21, 7)))
     GUI.add_element(search_div)
     switch = Switch((411, 512, 40, 25), 'Индекс', color_switch=(62, 151, 209), color_background=(240, 248, 255),
-                    color_background_on=(240, 248, 255), func = lambda: post_code(switch.on, globals()['address'])) #func = lambda: get_post_code() globals()['address']
+                    color_background_on=(240, 248, 255), func=lambda: post_code(switch.on, globals()[
+            'address']))  # func = lambda: get_post_code() globals()['address']
     GUI.add_element(switch)
 
     map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, _pt)
