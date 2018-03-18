@@ -31,15 +31,18 @@ def update_static(ll, z, map_type, add_params=None):
         map_request += "&" + add_params
     response = requests.get(map_request)
 
-    if response:
-        map_file = "map.png"
-        try:
-            with open(map_file, "wb") as file:
-                file.write(response.content)
-                return map_file
-        except IOError as ex:
-            print("Ошибка записи временного файла:", ex)
-            sys.exit(2)
+    if not response:
+        return None
+
+    # Запишем полученное изображение в файл.
+    map_file = "map.png"
+    try:
+        with open(map_file, "wb") as file:
+            file.write(response.content)
+            return map_file
+    except IOError as ex:
+        print("Ошибка записи временного файла:", ex)
+        sys.exit(2)
 
 
 def change_view(_view):
@@ -88,20 +91,19 @@ def post_code(_status_switch, _address, text):
         text.append(globals()['postcode'])
 
 
-def show_map(ll="37.620070,55.756640", z=16, _map_type='map', add_params=None):
+def show_map(ll, z, _map_type='map', add_params=None):
     global map_type, flag_update_map, address, postcode
-    global _lat, _lon, _pt
+    global _lon, _lat, _pt
 
     flag_update_map = False
     postcode = ''
     address = None
     map_type = _map_type
-    last_type = _map_type
 
     pygame.init()
     screen = pygame.display.set_mode((600, 540))
     _z = z
-    _lat, _lon = map(float, ll.split(','))
+    _lon, _lat = map(float, ll.split(','))
     _pt = add_params
     _tb_info = TextBlock((2, 452, 490, 86), [],
                          24, text_color=(77, 81, 83), bg_color=(255, 255, 255), name='tb_info')
@@ -121,7 +123,7 @@ def show_map(ll="37.620070,55.756640", z=16, _map_type='map', add_params=None):
                             'delete', but_color=(255, 255, 255), hovered=(190, 190, 190), size_font=24,
                             shift_text=(10, 7)),
                      Button('Поиск', (500, 21), (100, 30),
-                            lambda: get_coord('_lat', '_lon', 'tb_address', text_block=_tb_info, switch=switch.on),
+                            lambda: get_coord('_lon', '_lat', 'tb_address', text_block=_tb_info, switch=switch.on),
                             'but_search', but_color=(255, 255, 255), hovered=(190, 190, 190), size_font=24,
                             shift_text=(21, 7)))
     GUI.add_element(search_div)
@@ -130,7 +132,7 @@ def show_map(ll="37.620070,55.756640", z=16, _map_type='map', add_params=None):
                     func=lambda: post_code(switch.on, globals()['address'], _tb_info.text))
     GUI.add_element(switch)
 
-    map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
+    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, _pt)
     clock = pygame.time.Clock()
     while True:
         screen.fill((254, 202, 131))
@@ -145,75 +147,35 @@ def show_map(ll="37.620070,55.756640", z=16, _map_type='map', add_params=None):
                 if event.key == pygame.K_PAGEUP or event.key == pygame.K_w:
                     if _z - 1 >= 2:
                         _z -= 1
-                        map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
-                        if not map_file:
-                            _z += 1
-                            map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
+                        map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, _pt)
 
                 elif event.key == pygame.K_PAGEDOWN or event.key == pygame.K_s:
                     if _z + 1 <= 17:
                         _z += 1
-                        map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
-                        if not map_file:
-                            _z -= 1
-                            map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
+                        map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, _pt)
 
                 elif event.key == pygame.K_RIGHT:
-                    _lat += 422.4 / (2 ** (_z - 1))
-                    map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
-                    if not map_file:
-                        _lat -= 422.4 / (2 ** (_z - 1))
-                        map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
+                    _lon += 422.4 / (2 ** (_z - 1))
+                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, _pt)
 
                 elif event.key == pygame.K_LEFT:
-                    _lat -= 422.4 / (2 ** (_z - 1))
-                    map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
-                    if not map_file:
-                        _lat += 422.4 / (2 ** (_z - 1))
-                        map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
+                    _lon -= 422.4 / (2 ** (_z - 1))
+                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, _pt)
 
                 elif event.key == pygame.K_UP:
-                    _lon += 178.25792 / (2 ** (_z - 1))
-                    map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
-                    if not map_file:
-                        _lon -= 178.25792 / (2 ** (_z - 1))
-                        map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
+                    _lat += 178.25792 / (2 ** (_z - 1))
+                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, _pt)
 
                 elif event.key == pygame.K_DOWN:
-                    _lon -= 178.25792 / (2 ** (_z - 1))
-                    map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
-                    if not map_file:
-                        _lon += 178.25792 / (2 ** (_z - 1))
-                        map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                pos = event.pos
-                if 40 < pos[1] < 450:
-                    try:
-                        x_k = (422.4 / (2 ** (_z - 1))) / 600
-                        y_k = (178.25792 / (2 ** (_z - 1))) / 450
+                    _lat -= 178.25792 / (2 ** (_z - 1))
+                    map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, _pt)
 
-                        x, y = pos[0] - 300, 225 - pos[1]
-                        lat, lon = _lat + x * x_k, _lon + y * y_k
-                        clear_search(search, _tb_info)
-                        address = get_address(','.join([str(lat), str(lon)])).split(', ')
-                        _tb_info.text = [address[0], ', '.join(address[1:])]
-                        post_code(switch.on, ','.join([str(lat), str(lon)]), _tb_info.text)
-                        _pt = 'pt={},{},pm2rdm'.format(lat, lon)
-
-                        map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
-                    except Exception as e:
-                        print('Невозможно поставить метку')
             GUI.apply_event(event)
 
+        clock.tick(60)
+
         if flag_update_map:
-            map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
-            if not map_file:
-                map_type = last_type
-                map_file = update_static(','.join([str(_lat), str(_lon)]), _z, map_type, _pt)
-                buttons_view.elements[0].states['clicked'] = True
-                buttons_view.elements[1].states['clicked'] = False
-            else:
-                last_type = map_type
+            map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, _pt)
             flag_update_map = False
 
         screen.blit(pygame.image.load(map_file), (0, 0))
@@ -224,7 +186,9 @@ def show_map(ll="37.620070,55.756640", z=16, _map_type='map', add_params=None):
 
 
 def main():
-    show_map()
+    ll = "37.620070,55.756640"
+    z = 16
+    show_map(ll, z, "map")
 
 
 if __name__ == "__main__":
