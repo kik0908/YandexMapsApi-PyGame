@@ -6,8 +6,8 @@ import math
 import pygame
 import requests
 
-from gui import GUI, ButtonFlag, TextBox, DivButtons, Div, ButtonImage, Button
-from geocoder import get_coordinates
+from gui import GUI, ButtonFlag, TextBox, DivButtons, Div, ButtonImage, Button, TextBlock
+from geocoder import get_coordinates, get_address
 
 pygame.init()
 
@@ -45,27 +45,34 @@ def update_static(ll, z, map_type, add_params=None):
         sys.exit(2)
 
 
-def chance_viev(_viev):
+def change_view(_view):
     global map_type, flag_update_map
-    map_type = _viev
+    map_type = _view
     flag_update_map = True
 
 
-def get_coord(lon, lat, text_box_name=None, address=None):
+def get_coord(lon, lat, text_box_name=None, address=None, text_block=None):
     _address = address
-
     if text_box_name:
         text_box = GUI.get_object(text_box_name)
         if text_box.text != text_box.default_text:
             _address = text_box.text
-
-    if _address is not None:
+    if _address != None:
         coords = get_coordinates(_address)
-
         if coords != (None, None):
             globals()[lon], globals()[lat] = coords
             globals()['flag_update_map'] = True
             globals()['_pt'] = 'pt={},{},pm2rdm'.format(coords[0], coords[1])
+            if text_block:
+                _address_ = get_address(_address).split(', ')
+                text_block.text = [', '.join(_address_)]
+
+
+def clear_search(search, tb):
+    search.text = ''
+    tb.text = []
+    globals()['_pt'] = None
+    globals()['flag_update_map'] = True
 
 
 def show_map(ll, z, _map_type='map', add_params=None):
@@ -80,27 +87,31 @@ def show_map(ll, z, _map_type='map', add_params=None):
     _z = z
     _lon, _lat = map(float, ll.split(','))
     _pt = add_params
+    _tb_info = TextBlock((2, 452, 490, 86), [],
+                         24, text_color=(77, 81, 83), bg_color=(255, 255, 255), name='tb_info')
+    GUI.add_element(_tb_info)
 
-    buttons_viev = DivButtons(ButtonFlag((545, 465), buts, func=lambda: chance_viev('map'), text='Схема',
+    buttons_view = DivButtons(ButtonFlag((546, 465), buts, func=lambda: change_view('map'), text='Схема',
                                          text_size=23, name='but_satellite', shift_text=(-4, 0)),
-                              ButtonFlag((545, 495), buts, func=lambda: chance_viev('sat'), text='Спутник',
+                              ButtonFlag((546, 495), buts, func=lambda: change_view('sat'), text='Спутник',
                                          text_size=23, name='but_scheme', shift_text=(4, 0)),
-                              ButtonFlag((545, 525), buts, func=lambda: chance_viev('sat,skl'), text='Гибрид',
+                              ButtonFlag((546, 525), buts, func=lambda: change_view('sat,skl'), text='Гибрид',
                                          text_size=23, name='but_gibrid', shift_text=(3, 0)))
-    buttons_viev.elements[0].states['clicked'] = True
-    GUI.add_element(buttons_viev)
-    tb = TextBox((40, 5, 400, 30), '', default_text='Введите адрес...', name='tb_address')
-    search_div = Div(tb,
-                     Button('Поиск', (500, 21), (100, 30), lambda: get_coord('_lon', '_lat', 'tb_address'),
+    buttons_view.elements[0].states['clicked'] = True
+    GUI.add_element(buttons_view)
+    search = TextBox((40, 5, 400, 30), '', default_text='Введите адрес...', name='tb_address')
+    search_div = Div(search,
+                     Button('X', (425, 21), (29, 28), lambda: clear_search(search, _tb_info),
+                            'delete', but_color=(255, 255, 255), hovered=(190, 190, 190), size_font=24,
+                            shift_text=(10, 7)),
+                     Button('Поиск', (500, 21), (100, 30),
+                            lambda: get_coord('_lon', '_lat', 'tb_address', text_block=_tb_info),
                             'but_search', but_color=(255, 255, 255), hovered=(190, 190, 190), size_font=24,
                             shift_text=(21, 7)))
-
     GUI.add_element(search_div)
 
     map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, _pt)
-
     clock = pygame.time.Clock()
-
     while True:
         screen.fill((254, 202, 131))
 
@@ -111,12 +122,12 @@ def show_map(ll, z, _map_type='map', add_params=None):
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
 
-                if event.key == pygame.K_PAGEUP:
+                if event.key == pygame.K_PAGEUP or event.key == pygame.K_w:
                     if _z - 1 >= 2:
                         _z -= 1
                         map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, _pt)
 
-                elif event.key == pygame.K_PAGEDOWN:
+                elif event.key == pygame.K_PAGEDOWN or event.key == pygame.K_s:
                     if _z + 1 <= 17:
                         _z += 1
                         map_file = update_static(','.join([str(_lon), str(_lat)]), _z, map_type, _pt)
